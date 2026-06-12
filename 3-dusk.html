@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Securely Attached — Prototype 3: Dusk (Interactive)</title>
+<style>
+:root{
+  --night:#0C1110; --night-2:#121A18; --glass:rgba(255,255,255,.055);
+  --glass-edge:rgba(255,255,255,.09);
+  --moss:#9DBE8E; --moss-glow:rgba(157,190,142,.5); --moss-dim:rgba(157,190,142,.16);
+  --ember:#E0B091; --ember-dim:rgba(224,176,145,.15);
+  --tide:#8FC4C6; --tide-dim:rgba(143,196,198,.15);
+  --fog:#E9EDEA; --fog-2:#9AA6A0; --fog-3:#5E6B66;
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Rounded','SF Pro Display','Segoe UI',sans-serif;
+  --r-card:24px; --r-pill:980px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#06090A;font-family:var(--sans);color:var(--fog);padding:48px 40px;min-height:100vh;display:flex;flex-direction:column;align-items:center;-webkit-font-smoothing:antialiased}
+.intro{max-width:760px;margin:0 auto 36px;text-align:center}
+.intro .tag{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--moss);font-weight:600}
+.intro h1{font-size:40px;font-weight:300;letter-spacing:-.01em;margin:6px 0 4px}
+.intro p{color:var(--fog-2);font-size:15px;line-height:1.55}
+.hint{margin-top:10px;font-size:12.5px;color:var(--fog-3)}
+.phone{width:393px;height:852px;background:var(--night);border-radius:54px;border:10px solid #1A1F1E;box-shadow:0 30px 90px rgba(0,0,0,.6), 0 0 60px rgba(157,190,142,.05);overflow:hidden;position:relative;flex-shrink:0}
+.notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:34px;background:#1A1F1E;border-radius:20px;z-index:40}
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 6px;font-size:14px;font-weight:600;flex-shrink:0;z-index:5;color:var(--fog);position:relative}
+.app{height:100%;display:flex;flex-direction:column;position:relative}
+.views{flex:1;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;padding:8px 22px 20px;animation:fadeUp .35s cubic-bezier(.25,.1,.25,1);z-index:2}
+.view.active{display:flex}
+.view::-webkit-scrollbar{display:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.aura{position:absolute;width:420px;height:420px;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;top:-160px;left:50%;transform:translateX(-50%);background:radial-gradient(circle, rgba(157,190,142,.22), transparent 65%)}
+.gcard{background:var(--glass);border:1px solid var(--glass-edge);border-radius:var(--r-card);backdrop-filter:blur(16px)}
+.tabbar{height:84px;flex-shrink:0;background:rgba(12,17,16,.82);backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,.06);display:flex;padding:10px 12px 26px;z-index:5}
+.tab{flex:1;text-align:center;font-size:10px;color:var(--fog-3);font-weight:500;cursor:pointer;border:none;background:none;font-family:var(--sans);transition:transform .15s}
+.tab:active{transform:scale(.92)}
+.tab .ti{font-size:20px;display:block;margin-bottom:3px;opacity:.5}
+.tab.on{color:var(--moss)} .tab.on .ti{opacity:1}
+.greet-time{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--fog-3);font-weight:600;margin-top:10px}
+h2.greet{font-size:29px;font-weight:300;letter-spacing:-.01em;line-height:1.2;margin:6px 0 2px}
+h2.greet b{font-weight:600;color:var(--moss)}
+.greet-sub{font-size:13.5px;color:var(--fog-2);margin-bottom:18px}
+
+/* TONIGHT */
+.moon-card{padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:18px;background:linear-gradient(135deg, rgba(157,190,142,.13), rgba(143,196,198,.07));border:1px solid rgba(157,190,142,.18);border-radius:var(--r-card)}
+.moonring{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;transition:background .6s}
+.moonring i{width:44px;height:44px;border-radius:50%;background:var(--night-2);display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700;color:var(--moss)}
+.moon-card .mt{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+.moon-card .ms{font-size:12.5px;color:var(--fog-2);margin-top:2px;line-height:1.45}
+.dslot{padding:17px 18px;display:flex;align-items:center;gap:14px;margin-bottom:12px;cursor:pointer;border:1px solid var(--glass-edge);background:var(--glass);border-radius:var(--r-card);width:100%;text-align:left;font-family:var(--sans);color:var(--fog);transition:all .3s}
+.dslot:active{transform:scale(.97)}
+.dslot .orbdot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.dslot.reg .orbdot{background:var(--moss-dim);box-shadow:0 0 22px rgba(157,190,142,.25)}
+.dslot.awa .orbdot{background:var(--ember-dim);box-shadow:0 0 22px rgba(224,176,145,.18)}
+.dslot.int .orbdot{background:var(--tide-dim);box-shadow:0 0 22px rgba(143,196,198,.18)}
+.dslot .dc{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+.dslot.reg .dc{color:var(--moss)} .dslot.awa .dc{color:var(--ember)} .dslot.int .dc{color:var(--tide)}
+.dslot .dn{font-size:16.5px;font-weight:600;letter-spacing:-.01em;margin-top:2px}
+.dslot .dm{font-size:12px;color:var(--fog-2);margin-top:1px}
+.dslot .dgo{margin-left:auto;font-size:16px;color:var(--fog-3)}
+.dslot.done{opacity:.45}
+.dslot.done .dgo{color:var(--moss)}
+.dslot.next{border-color:rgba(157,190,142,.35);background:rgba(157,190,142,.07)}
+.bigsos{margin-top:16px;border-radius:var(--r-card);padding:19px;text-align:center;background:linear-gradient(135deg, rgba(224,128,98,.18), rgba(224,128,98,.08));border:1px solid rgba(224,140,110,.3);cursor:pointer;width:100%;font-family:var(--sans);transition:transform .15s}
+.bigsos:active{transform:scale(.97)}
+.bigsos .st1{font-size:16px;font-weight:600;color:#EFA98C}
+.bigsos .st2{font-size:12px;color:var(--fog-2);margin-top:3px}
+.celebrate{display:none;margin-top:14px;text-align:center;font-size:14px;color:var(--moss);font-weight:300;letter-spacing:.02em}
+.celebrate.show{display:block;animation:fadeUp .5s}
+
+/* BREATHE OVERLAY */
+.breathe{position:absolute;inset:0;z-index:30;background:radial-gradient(120% 90% at 50% 30%, #16241F 0%, #0C1110 60%, #080C0B 100%);display:none;flex-direction:column;align-items:center;text-align:center;padding:64px 32px 0}
+.breathe.active{display:flex;animation:fadeUp .4s}
+.bt-eyebrow{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--fog-3);font-weight:700;margin-top:8px}
+.breathe .bt{font-size:24px;font-weight:300;letter-spacing:-.005em;margin-top:7px}
+.orbfield{position:relative;width:300px;height:300px;margin:20px 0 14px;display:grid;place-items:center}
+.glow{position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle, var(--moss-glow), transparent 70%);filter:blur(36px);transform:scale(.7);opacity:.5;transition:all 6s ease-in-out}
+.glow.in1{transition-duration:2.2s;transform:scale(1);opacity:.85}
+.glow.in2{transition-duration:1.3s;transform:scale(1.14);opacity:1}
+.glow.out{transition-duration:5.8s;transform:scale(.7);opacity:.5}
+.dorb{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 36% 30%, #C2DCB4, #9DBE8E 50%, #5C7A52 95%);box-shadow:0 0 70px var(--moss-glow), inset 0 -16px 44px rgba(0,0,0,.3);z-index:2;transform:scale(.72);transition:transform 6s ease-in-out}
+.dorb.in1{transition-duration:2.2s;transform:scale(.95)}
+.dorb.in2{transition-duration:1.3s;transform:scale(1.06)}
+.dorb.out{transition-duration:5.8s;transform:scale(.72)}
+.starring{position:absolute;inset:8px;border-radius:50%;border:1px dashed rgba(157,190,142,.2);animation:spin 60s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.breathe .phase{font-size:21px;font-weight:300;letter-spacing:.01em;min-height:30px}
+.breathe .count{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--moss);margin-top:7px;font-weight:700;min-height:16px}
+.haptic-note{display:flex;align-items:center;gap:7px;margin-top:16px;font-size:12px;color:var(--fog-3)}
+.bend{margin-top:auto;margin-bottom:46px;font-size:14px;color:var(--fog-2);border:1px solid rgba(255,255,255,.14);border-radius:var(--r-pill);padding:13px 38px;cursor:pointer;background:none;font-family:var(--sans);transition:all .25s}
+.bend:hover{background:rgba(255,255,255,.06)}
+.bend.donebtn{background:var(--moss);color:#0C1110;font-weight:600;border-color:var(--moss)}
+
+/* JOURNAL */
+.jhead{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--ember);font-weight:700;margin-top:10px}
+.view h2.vt{font-size:26px;font-weight:300;margin:6px 0 16px}
+.dprompt{padding:22px;margin-bottom:14px;background:linear-gradient(135deg, rgba(224,176,145,.12), rgba(255,255,255,.04));border:1px solid rgba(224,176,145,.2);border-radius:var(--r-card)}
+.dprompt .dq{font-size:18px;font-weight:400;line-height:1.45}
+.dprompt .dlock{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--fog-2);margin-top:13px}
+.deditor{padding:22px;min-height:210px;font-size:16px;line-height:1.7;font-weight:300;outline:none;color:var(--fog)}
+.deditor:focus{border-color:rgba(224,176,145,.45)}
+.dtags{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.dtag{background:var(--glass);border:1px solid var(--glass-edge);border-radius:var(--r-pill);padding:9px 16px;font-size:12.5px;font-weight:500;color:var(--fog-2);cursor:pointer;font-family:var(--sans);transition:all .2s}
+.dtag.on{background:var(--ember-dim);border-color:rgba(224,176,145,.35);color:var(--ember)}
+.savebtn{margin-top:14px;background:var(--ember-dim);color:var(--ember);border:1px solid rgba(224,176,145,.35);border-radius:var(--r-pill);padding:14px;width:100%;font-size:14.5px;font-weight:600;font-family:var(--sans);cursor:pointer;transition:transform .15s}
+.savebtn:active{transform:scale(.97)}
+
+/* PROGRESS */
+.ph-eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--tide);font-weight:700;margin-top:10px}
+.constellation{padding:20px 18px 16px;margin-bottom:14px}
+.constellation h4{font-size:13px;font-weight:600;color:var(--fog-2);margin-bottom:4px;letter-spacing:.04em}
+.const-svg{display:block;margin:0 auto}
+.const-svg circle.day{cursor:pointer}
+.const-cap{text-align:center;font-size:12px;color:var(--fog-3);margin-top:8px}
+.dstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.dstat{padding:14px 8px;text-align:center}
+.dstat .v{font-size:23px;font-weight:600;letter-spacing:-.02em}
+.dstat .v.g{color:var(--moss)} .dstat .v.e{color:var(--ember)} .dstat .v.t{color:var(--tide)}
+.dstat .l{font-size:10px;color:var(--fog-3);margin-top:3px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.dinsight{padding:18px 20px;background:linear-gradient(135deg, rgba(157,190,142,.1), rgba(143,196,198,.07));border:1px solid rgba(157,190,142,.18);border-radius:var(--r-card)}
+.dinsight .di-h{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--moss);font-weight:700;margin-bottom:8px}
+.dinsight p{font-size:14.5px;line-height:1.55;font-weight:300}
+
+/* PLACEHOLDER */
+.placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;color:var(--fog-2)}
+.placeholder .pe{font-size:44px}
+.placeholder h3{font-size:22px;font-weight:300;color:var(--fog)}
+.placeholder p{font-size:13.5px;max-width:240px;line-height:1.5}
+.toast{position:absolute;bottom:104px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(233,237,234,.95);color:#0C1110;font-size:13px;font-weight:500;padding:11px 22px;border-radius:var(--r-pill);opacity:0;transition:all .35s;z-index:50;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <div class="tag">Prototype 03 · Interactive</div>
+  <h1>Dusk</h1>
+  <p>Dark-first immersive calm — glowing breath orb, glass cards, night-canvas for the app's heaviest moments.</p>
+  <div class="hint">Tap tabs · tap Self-Validation or the triggered card to breathe · stars on Progress are tappable</div>
+</div>
+
+<div class="phone"><div class="notch"></div>
+  <div class="app">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="views">
+      <div class="aura"></div>
+
+      <!-- TONIGHT -->
+      <div class="view active" id="v-today">
+        <div class="greet-time">Thursday · June 12</div>
+        <h2 class="greet">Good evening, <b>Tre</b></h2>
+        <div class="greet-sub" id="greetsub">One practice left before the day closes</div>
+        <div class="moon-card">
+          <div class="moonring" id="moonring"><i id="moonlabel">2/3</i></div>
+          <div>
+            <div class="mt">Week 6 · Phase 2 — Awareness</div>
+            <div class="ms" id="moondesc">Noticing the pattern before the protest. 38 of 84 days complete.</div>
+          </div>
+        </div>
+        <button class="dslot reg done" onclick="toast('Completed this morning')">
+          <span class="orbdot">🫁</span>
+          <span><span class="dc">Regulation</span><span class="dn" style="display:block">Physiological Sigh</span><span class="dm">3 min · this morning</span></span>
+          <span class="dgo">✓</span>
+        </button>
+        <button class="dslot awa done" onclick="toast('Completed at midday')">
+          <span class="orbdot">🪞</span>
+          <span><span class="dc">Awareness</span><span class="dn" style="display:block">Schema Check-In</span><span class="dm">5 min · midday</span></span>
+          <span class="dgo">✓</span>
+        </button>
+        <button class="dslot int next" id="slot-int" onclick="openBreathe(false)">
+          <span class="orbdot">🌿</span>
+          <span><span class="dc">Integration</span><span class="dn" style="display:block">Self-Validation</span><span class="dm" id="int-dm">4 min · tonight</span></span>
+          <span class="dgo" id="int-dgo">›</span>
+        </button>
+        <div class="celebrate" id="celebrate">✶ &nbsp;Day complete. The constellation grows. &nbsp;✶</div>
+        <button class="bigsos" onclick="openBreathe(true)">
+          <span class="st1" style="display:block">◉ &nbsp;I'm triggered right now</span>
+          <span class="st2" style="display:block">90-second regulation, no questions asked</span>
+        </button>
+      </div>
+
+      <!-- JOURNAL -->
+      <div class="view" id="v-journal">
+        <div class="jhead">Awareness · Protest Behavior</div>
+        <h2 class="vt">Tonight's reflection</h2>
+        <div class="dprompt">
+          <div class="dq">When you felt the urge to text again tonight — what was the feeling underneath the urge?</div>
+          <div class="dlock">🔒 End-to-end encrypted · only you hold the key</div>
+        </div>
+        <div class="gcard deditor" contenteditable="true">I noticed my chest tighten when she didn't reply. The old story started — "you're too much." But I paused this time and&nbsp;</div>
+        <div class="dtags">
+          <button class="dtag on" onclick="this.classList.toggle('on')">😰 Anxious</button>
+          <button class="dtag" onclick="this.classList.toggle('on')">Chest</button>
+          <button class="dtag" onclick="this.classList.toggle('on')">Tight jaw</button>
+          <button class="dtag" onclick="this.classList.toggle('on')">Restless</button>
+        </div>
+        <button class="savebtn" onclick="saveEntry(this)">Seal entry</button>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="view" id="v-progress">
+        <div class="ph-eyebrow">Your journey</div>
+        <h2 class="vt">Six weeks of light</h2>
+        <div class="gcard constellation">
+          <h4>Each star — one fully completed day · tap to inspect</h4>
+          <svg class="const-svg" width="300" height="150" viewBox="0 0 300 150" id="constsvg">
+            <polyline points="18,118 48,96 76,108 104,72 130,84 158,52 186,64 214,38 244,48 274,26" fill="none" stroke="rgba(157,190,142,.3)" stroke-width="1"/>
+          </svg>
+          <div class="const-cap" id="constcap">Rising — week 6 sits highest yet</div>
+        </div>
+        <div class="dstats">
+          <div class="gcard dstat"><div class="v g" id="fulldays">38</div><div class="l">Full days</div></div>
+          <div class="gcard dstat"><div class="v e">12</div><div class="l">Streak</div></div>
+          <div class="gcard dstat"><div class="v t" id="practices">114</div><div class="l">Practices</div></div>
+        </div>
+        <div class="dinsight">
+          <div class="di-h">✨ Pattern noticed</div>
+          <p>Your entries mention "the pause" three times more often than week one. The space between trigger and response is widening.</p>
+        </div>
+      </div>
+
+      <!-- COUPLES -->
+      <div class="view" id="v-couples">
+        <div class="placeholder">
+          <div class="pe">🤍</div>
+          <h3>Couples</h3>
+          <p>Shared practices, repair-attempt scripts, partner check-ins. Out of scope for this prototype.</p>
+        </div>
+      </div>
+
+      <!-- LIBRARY -->
+      <div class="view" id="v-library">
+        <div class="placeholder">
+          <div class="pe">📚</div>
+          <h3>Library</h3>
+          <p>All 37 practices, browsable by slot and attachment style.</p>
+        </div>
+      </div>
+
+      <!-- BREATHE OVERLAY -->
+      <div class="breathe" id="breathe">
+        <div class="bt-eyebrow" id="b-eyebrow">Regulation · Round 1 of 5</div>
+        <div class="bt" id="b-title">Physiological Sigh</div>
+        <div class="orbfield">
+          <div class="glow" id="glow"></div>
+          <div class="starring"></div>
+          <div class="dorb" id="orb"></div>
+        </div>
+        <div class="phase" id="b-phase">Settle in…</div>
+        <div class="count" id="b-count"></div>
+        <div class="haptic-note">〰 Haptics synced to your breath</div>
+        <button class="bend" id="b-end" onclick="endBreathe()">End early — that's okay too</button>
+      </div>
+
+    </div>
+
+    <div class="tabbar">
+      <button class="tab on" onclick="go('today',this)"><span class="ti">🌙</span>Tonight</button>
+      <button class="tab" onclick="go('journal',this)"><span class="ti">📖</span>Journal</button>
+      <button class="tab" onclick="go('progress',this)"><span class="ti">✨</span>Progress</button>
+      <button class="tab" onclick="go('couples',this)"><span class="ti">🤍</span>Couples</button>
+      <button class="tab" onclick="go('library',this)"><span class="ti">📚</span>Library</button>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+function go(v,btn){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('v-'+v).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// moon ring
+let doneCount=2, intDone=false;
+function paintMoon(){
+  const pct=doneCount/3*100;
+  document.getElementById('moonring').style.background=
+    `conic-gradient(var(--moss) 0 ${pct}%, rgba(255,255,255,.08) ${pct}% 100%)`;
+  document.getElementById('moonlabel').textContent=doneCount+'/3';
+}
+paintMoon();
+
+// breathing — physiological sigh
+const PHASES=[
+  {label:'Breathe in…', count:'Inhale · 2s', cls:'in1', ms:2200},
+  {label:'A little more', count:'Top-up · 1s', cls:'in2', ms:1300},
+  {label:'Let it all out…', count:'Exhale · 6s', cls:'out', ms:5800},
+];
+const TOTAL_ROUNDS=5;
+let bTimer=null, round=0, isSOS=false, finished=false;
+
+function openBreathe(sos){
+  if(!sos && intDone){ toast('Already complete tonight'); return; }
+  isSOS=sos; finished=false; round=0;
+  document.getElementById('b-title').textContent = sos ? "You're safe. Breathe with me." : 'Physiological Sigh';
+  const end=document.getElementById('b-end');
+  end.textContent="End early — that's okay too"; end.classList.remove('donebtn');
+  document.getElementById('breathe').classList.add('active');
+  runPhase(0);
+}
+function runPhase(i){
+  if(i===0){
+    round++;
+    if(round>TOTAL_ROUNDS){ completeBreathe(); return; }
+    document.getElementById('b-eyebrow').textContent=
+      (isSOS?'Emergency regulation':'Regulation')+' · Round '+round+' of '+TOTAL_ROUNDS;
+  }
+  const p=PHASES[i];
+  [document.getElementById('orb'),document.getElementById('glow')].forEach(el=>{
+    el.classList.remove('in1','in2','out');
+    void el.offsetWidth;
+    el.classList.add(p.cls);
+  });
+  document.getElementById('b-phase').textContent=p.label;
+  document.getElementById('b-count').textContent=p.count;
+  bTimer=setTimeout(()=>runPhase((i+1)%PHASES.length), p.ms);
+}
+function completeBreathe(){
+  finished=true;
+  clearTimeout(bTimer);
+  document.getElementById('b-phase').textContent='Still here. Well done.';
+  document.getElementById('b-count').textContent='5 rounds complete';
+  document.getElementById('b-eyebrow').textContent='Complete';
+  const end=document.getElementById('b-end');
+  end.textContent='Finish & return'; end.classList.add('donebtn');
+}
+function endBreathe(){
+  clearTimeout(bTimer);
+  document.getElementById('breathe').classList.remove('active');
+  if(finished && !isSOS) markIntegrationDone();
+  else if(finished && isSOS) toast('Logged: regulation moment, 9:41p');
+  else toast('Ended early — still counts as showing up');
+}
+function markIntegrationDone(){
+  if(intDone) return;
+  intDone=true; doneCount=3; paintMoon();
+  const slot=document.getElementById('slot-int');
+  slot.classList.remove('next'); slot.classList.add('done');
+  document.getElementById('int-dgo').textContent='✓';
+  document.getElementById('int-dm').textContent='4 min · completed 9:41p';
+  document.getElementById('greetsub').textContent='All three complete. Rest well.';
+  document.getElementById('moondesc').textContent='Noticing the pattern before the protest. 39 of 84 days complete.';
+  document.getElementById('celebrate').classList.add('show');
+  document.getElementById('fulldays').textContent='39';
+  document.getElementById('practices').textContent='115';
+  addStar();
+}
+
+// journal
+function saveEntry(btn){
+  btn.textContent='Sealed ✓';
+  toast('Encrypted — only you hold the key');
+  setTimeout(()=>{btn.textContent='Seal entry';},2000);
+}
+
+// constellation
+const DAYS=[
+  {x:18,y:118,r:3.5,c:'#9DBE8E',w:'Week 1 · 3 full days'},
+  {x:48,y:96,r:3,c:'#9DBE8E',w:'Week 1–2 · streak began'},
+  {x:76,y:108,r:2.5,c:'#8FC4C6',w:'Week 2 · integration day'},
+  {x:104,y:72,r:3.5,c:'#9DBE8E',w:'Week 3 · 6 full days'},
+  {x:130,y:84,r:2.5,c:'#E0B091',w:'Week 3 · awareness focus'},
+  {x:158,y:52,r:3,c:'#9DBE8E',w:'Week 4 · phase 1 complete'},
+  {x:186,y:64,r:2.5,c:'#8FC4C6',w:'Week 5 · phase 2 began'},
+  {x:214,y:38,r:3.5,c:'#9DBE8E',w:'Week 5 · 7/7 perfect week'},
+  {x:244,y:48,r:3,c:'#E0B091',w:'Week 6 · protest journal started'},
+  {x:274,y:26,r:5,c:'#C2DCB4',w:'Today · day 38',pulse:true},
+];
+const svg=document.getElementById('constsvg');
+const NS='http://www.w3.org/2000/svg';
+DAYS.forEach(d=>{
+  const c=document.createElementNS(NS,'circle');
+  c.setAttribute('cx',d.x);c.setAttribute('cy',d.y);c.setAttribute('r',d.r);
+  c.setAttribute('fill',d.c);c.setAttribute('class','day');
+  c.addEventListener('click',()=>toast(d.w));
+  if(d.pulse){
+    const a=document.createElementNS(NS,'animate');
+    a.setAttribute('attributeName','opacity');a.setAttribute('values','1;.4;1');
+    a.setAttribute('dur','2.4s');a.setAttribute('repeatCount','indefinite');
+    c.appendChild(a);
+  }
+  svg.appendChild(c);
+});
+[[34,40],[90,22],[150,120],[230,100],[262,80],[60,58]].forEach(([x,y])=>{
+  const c=document.createElementNS(NS,'circle');
+  c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',1.1);
+  c.setAttribute('fill','rgba(233,237,234,.35)');
+  svg.appendChild(c);
+});
+function addStar(){
+  const c=document.createElementNS(NS,'circle');
+  c.setAttribute('cx',290);c.setAttribute('cy',18);c.setAttribute('r',4);
+  c.setAttribute('fill','#C2DCB4');c.setAttribute('class','day');
+  c.addEventListener('click',()=>toast('Tonight · day 39 — just completed'));
+  svg.appendChild(c);
+  document.getElementById('constcap').textContent='A new star tonight — day 39';
+}
+</script>
+</body>
+</html>
