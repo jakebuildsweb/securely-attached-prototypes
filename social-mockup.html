@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Poll Flow Mockups — IG &amp; Facebook</title>
+<style>
+  :root{
+    --ink:#22302a; --muted:#8a948e; --bg:#101413;
+    --card:#ffffff; --fbblue:#1877f2;
+  }
+  *{margin:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;background:var(--bg);color:#e8ece9;min-height:100vh;padding:48px 24px;display:flex;flex-direction:column;align-items:center;-webkit-font-smoothing:antialiased}
+  h1{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px;text-align:center}
+  p.sub{color:var(--muted);font-size:15px;margin-bottom:40px;text-align:center;max-width:560px}
+  .row{display:flex;gap:56px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+  .col{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .collabel{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+  /* ===== shared phone ===== */
+  .phone{width:360px;height:780px;border-radius:48px;border:9px solid #1d1d1f;overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+
+  /* ===== IG STORY ===== */
+  .ig{background:linear-gradient(165deg,#1b2420 0%,#0d1412 55%,#151016 100%)}
+  .ig .bars{position:absolute;top:14px;left:12px;right:12px;display:flex;gap:4px;z-index:5}
+  .ig .bars i{flex:1;height:2.5px;border-radius:2px;background:rgba(255,255,255,.35)}
+  .ig .bars i.on{background:#fff}
+  .ig .head{position:absolute;top:26px;left:14px;right:14px;display:flex;align-items:center;gap:10px;z-index:5}
+  .ig .av{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#9DBE8E,#5E8C61);border:2px solid rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:15px}
+  .ig .uname{font-size:14px;font-weight:600;color:#fff}
+  .ig .when{font-size:13px;color:rgba(255,255,255,.6)}
+  .ig .x{margin-left:auto;color:#fff;font-size:20px;opacity:.85}
+
+  .shots{position:absolute;top:104px;left:0;right:0;display:flex;justify-content:center;align-items:flex-start;z-index:1}
+  .shots img{width:128px;border-radius:14px;box-shadow:0 14px 38px rgba(0,0,0,.55)}
+  .shots img:nth-child(1){transform:rotate(-7deg) translateY(16px) translateX(10px)}
+  .shots img:nth-child(2){transform:translateY(0);z-index:2;width:138px}
+  .shots img:nth-child(3){transform:rotate(7deg) translateY(16px) translateX(-10px)}
+
+  .linkpill{position:absolute;top:392px;left:50%;transform:translateX(-50%) rotate(-2deg);background:#fff;color:#1a1a1a;font-size:13px;font-weight:600;padding:8px 14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:4;white-space:nowrap}
+  .linkpill span{color:var(--fbblue)}
+
+  .pollcard{position:absolute;top:448px;left:32px;right:32px;background:#fff;border-radius:18px;padding:16px 16px 12px;z-index:4;box-shadow:0 10px 32px rgba(0,0,0,.4)}
+  .pollq{font-size:15px;font-weight:700;color:#1a1a1a;text-align:center;margin-bottom:12px}
+  .popt{position:relative;border:1.5px solid #d8dadf;border-radius:12px;height:42px;margin-bottom:8px;overflow:hidden;display:flex;align-items:center}
+  .popt .fill{position:absolute;inset:0;width:var(--w);background:#eef3ee}
+  .popt b{position:relative;font-size:14px;color:#1a1a1a;padding-left:12px;font-weight:600}
+  .popt .pct{position:relative;margin-left:auto;padding-right:12px;font-size:13px;font-weight:700;color:#444}
+  .pollmeta{font-size:11px;color:#9a9a9a;text-align:center;margin-top:4px}
+
+  .ig .reply{position:absolute;bottom:18px;left:14px;right:14px;display:flex;align-items:center;gap:12px;z-index:5}
+  .ig .replybox{flex:1;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:11px 16px;font-size:14px;color:rgba(255,255,255,.6)}
+  .ig .reply .ic{font-size:20px}
+
+  /* ===== FACEBOOK ===== */
+  .fb{background:#f0f2f5;display:flex;flex-direction:column}
+  .fb .nav{background:#fff;padding:14px 16px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #e4e6eb}
+  .fb .logo{color:var(--fbblue);font-size:24px;font-weight:800;letter-spacing:-.03em;flex:1}
+  .fb .nic{width:34px;height:34px;border-radius:50%;background:#e4e6eb;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .post{background:#fff;margin-top:8px}
+  .post .phead{display:flex;align-items:center;gap:10px;padding:12px 14px 8px}
+  .post .av{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#F4D3C4,#87A878);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .post .pname{font-size:14.5px;font-weight:600;color:#050505}
+  .post .pwhen{font-size:12.5px;color:#65676b}
+  .post .ptext{padding:2px 14px 10px;font-size:14.5px;line-height:1.4;color:#050505}
+  .preview{border-top:1px solid #e4e6eb;border-bottom:1px solid #e4e6eb}
+  .pimgs{display:flex;gap:2px;background:#000}
+  .pimgs img{width:33.33%;height:230px;object-fit:cover;object-position:top}
+  .pfoot{background:#f0f2f5;padding:10px 14px}
+  .pdom{font-size:12px;color:#65676b;text-transform:uppercase;letter-spacing:.02em}
+  .ptitle{font-size:14.5px;font-weight:600;color:#050505;margin-top:2px}
+  .stats{display:flex;justify-content:space-between;padding:10px 14px;font-size:13.5px;color:#65676b}
+  .acts{display:flex;border-top:1px solid #e4e6eb;margin:0 14px;padding:4px 0}
+  .acts span{flex:1;text-align:center;padding:8px 0;font-size:14px;font-weight:600;color:#65676b}
+  .comments{padding:6px 14px 14px;display:flex;flex-direction:column;gap:8px}
+  .cmt{display:flex;gap:8px;align-items:flex-start}
+  .cmt .cav{width:28px;height:28px;border-radius:50%;background:#d8dde3;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .cmt .bubble{background:#f0f2f5;border-radius:16px;padding:8px 12px;font-size:13.5px;color:#050505;line-height:1.35}
+  .cmt .bubble b{display:block;font-size:12.5px}
+
+  /* flow steps */
+  .steps{max-width:360px;display:flex;flex-direction:column;gap:8px}
+  .step{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#c4cdc7;line-height:1.45}
+  .step i{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#27332d;color:#9DBE8E;font-style:normal;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .note{max-width:360px;background:#1a211e;border:1px solid #27332d;border-radius:12px;padding:10px 14px;font-size:12.5px;color:#9aa69e;line-height:1.5}
+  footer{margin-top:48px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<h1>Poll flow — Instagram &amp; Facebook</h1>
+<p class="sub">Mockups of how each post could look. Instagram gets a real 3-option poll sticker; Facebook feed votes happen in the comments.</p>
+
+<div class="row">
+
+  <!-- INSTAGRAM STORY -->
+  <div class="col">
+    <div class="collabel">Instagram Story</div>
+    <div class="phone ig">
+      <div class="bars"><i class="on"></i><i></i><i></i></div>
+      <div class="head">
+        <div class="av">🌿</div>
+        <div><span class="uname">securelyattached</span> <span class="when">2m</span></div>
+        <div class="x">✕</div>
+      </div>
+      <div class="shots">
+        <img src="shots/1-sanctuary.png" alt="Sanctuary">
+        <img src="shots/2-clarity.png" alt="Clarity">
+        <img src="shots/3-dusk.png" alt="Dusk">
+      </div>
+      <div class="linkpill">🔗 <span>try all three live</span></div>
+      <div class="pollcard">
+        <div class="pollq">Redesigning my app — which one feels right?</div>
+        <div class="popt" style="--w:38%"><span class="fill"></span><b>1 · Sanctuary</b><span class="pct">38%</span></div>
+        <div class="popt" style="--w:21%"><span class="fill"></span><b>2 · Clarity</b><span class="pct">21%</span></div>
+        <div class="popt" style="--w:41%"><span class="fill"></span><b>3 · Dusk</b><span class="pct">41%</span></div>
+        <div class="pollmeta">47 votes · results visible after voting</div>
+      </div>
+      <div class="reply">
+        <div class="replybox">Send message</div>
+        <span class="ic">🤍</span><span class="ic">📤</span>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><i>1</i>Post story with the 3-screenshot collage as the background</div>
+      <div class="step"><i>2</i>Add the poll sticker — supports up to 4 options, so all 3 fit</div>
+      <div class="step"><i>3</i>Add a link sticker pointing to the live poll page so people can tap around before voting</div>
+    </div>
+  </div>
+
+  <!-- FACEBOOK -->
+  <div class="col">
+    <div class="collabel">Facebook Feed</div>
+    <div class="phone fb">
+      <div class="nav"><span class="logo">facebook</span><span class="nic">🔍</span><span class="nic">💬</span></div>
+      <div class="post">
+        <div class="phead">
+          <div class="av">🙂</div>
+          <div>
+            <div class="pname">Tre Ballard</div>
+            <div class="pwhen">Just now · 🌐</div>
+          </div>
+        </div>
+        <div class="ptext">Redesigning my app and I'm torn between three directions. Which one would you actually want to open every day — 1, 2, or 3? You can tap through all of them here 👇</div>
+        <div class="preview">
+          <div class="pimgs">
+            <img src="shots/1-sanctuary.png" alt="Sanctuary">
+            <img src="shots/2-clarity.png" alt="Clarity">
+            <img src="shots/3-dusk.png" alt="Dusk">
+          </div>
+          <div class="pfoot">
+            <div class="pdom">securely-attached-prototypes.netlify.app</div>
+            <div class="ptitle">Securely Attached — Design Directions</div>
+          </div>
+        </div>
+        <div class="stats"><span>👍❤️ 12</span><span>9 comments</span></div>
+        <div class="acts"><span>👍 Like</span><span>💬 Comment</span><span>↪ Share</span></div>
+        <div class="comments">
+          <div class="cmt"><div class="cav">K</div><div class="bubble"><b>Kayla M.</b>3!! The dark one is gorgeous</div></div>
+          <div class="cmt"><div class="cav">D</div><div class="bubble"><b>Devon R.</b>1 for me — feels warm, like the app actually cares</div></div>
+          <div class="cmt"><div class="cav">A</div><div class="bubble"><b>Ana P.</b>2. Clean and easy to read, I'd use it daily</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><i>1</i>Post the caption + link — the preview pulls the poll page automatically</div>
+      <div class="step"><i>2</i>People vote in the comments (feed posts no longer have native polls)</div>
+      <div class="step"><i>3</i>Optional: post in a relevant group instead — groups still have real multi-option polls</div>
+    </div>
+    <div class="note">Facebook Stories do have a poll sticker, but it caps at 2 options — doesn't fit 3 designs. Feed + comments or a group poll works better.</div>
+  </div>
+
+</div>
+<footer>Mockups only — numbers and comments are placeholders.</footer>
+</body>
+</html>
