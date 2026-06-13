@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Securely Attached — Prototype 6: Eclipse (Clarity × Dusk, refined)</title>
+<style>
+:root{
+  --bg:#0D1211; --bg-deep:#080C0B;
+  --card:rgba(255,255,255,.055); --card-press:rgba(255,255,255,.09);
+  --hairline:rgba(255,255,255,.075);
+  --ink:#F2F5F3; --ink-2:#93A09A; --ink-3:#5C6963;
+  --reg:#8FD694; --awa:#F2A57B; --int:#7FC8CC;
+  --moss:#9DBE8E; --moss-glow:rgba(157,190,142,.5);
+  --ember:#E08A6D;
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+  --r-card:18px; --r-pill:980px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#06090A;font-family:var(--sans);color:var(--ink);padding:48px 40px;min-height:100vh;display:flex;flex-direction:column;align-items:center;-webkit-font-smoothing:antialiased}
+.intro{max-width:760px;margin:0 auto 36px;text-align:center}
+.intro .tag{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--moss);font-weight:600}
+.intro h1{font-size:40px;font-weight:600;letter-spacing:-.02em;margin:6px 0 4px;color:#EDF1EE}
+.intro p{color:#8B958F;font-size:15px;line-height:1.55}
+.hint{margin-top:10px;font-size:12.5px;color:#5C6963}
+.phone{width:393px;height:852px;background:var(--bg);border-radius:54px;border:10px solid #1A1F1E;box-shadow:0 30px 90px rgba(0,0,0,.6), 0 0 60px rgba(157,190,142,.05);overflow:hidden;position:relative;flex-shrink:0}
+.notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:34px;background:#060908;border-radius:20px;z-index:40}
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 6px;font-size:14px;font-weight:600;flex-shrink:0;z-index:35;position:relative;color:var(--ink)}
+.app{height:100%;display:flex;flex-direction:column;position:relative}
+.views{flex:1;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;padding:6px 20px 20px;animation:fadeUp .3s cubic-bezier(.25,.1,.25,1)}
+.view.active{display:flex}
+.view::-webkit-scrollbar{display:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.tabbar{height:84px;flex-shrink:0;background:rgba(10,14,13,.78);backdrop-filter:blur(24px);border-top:1px solid var(--hairline);display:flex;padding:10px 12px 26px;z-index:5}
+.tab{flex:1;text-align:center;font-size:10px;color:var(--ink-3);font-weight:500;cursor:pointer;border:none;background:none;font-family:var(--sans);transition:transform .15s}
+.tab:active{transform:scale(.92)}
+.tab .ti{font-size:21px;display:block;margin-bottom:3px;filter:grayscale(1);opacity:.45}
+.tab.on{color:var(--moss)} .tab.on .ti{filter:none;opacity:1}
+.large-title{font-size:33px;font-weight:700;letter-spacing:-.022em;margin:8px 0 2px}
+.subtitle{font-size:14px;color:var(--ink-2);margin-bottom:16px}
+.card{background:var(--card);border-radius:var(--r-card);border:1px solid var(--hairline);backdrop-filter:blur(10px)}
+.sec-label{font-size:13px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;margin:16px 2px 8px}
+
+/* TODAY */
+.rings-card{padding:20px;display:flex;align-items:center;gap:22px}
+.rings{position:relative;width:128px;height:128px;flex-shrink:0}
+.rings svg{transform:rotate(-90deg)}
+.rings circle.fill{transition:stroke-dashoffset 1s cubic-bezier(.25,.1,.25,1)}
+.rings .r-reg{filter:drop-shadow(0 0 5px rgba(143,214,148,.55))}
+.rings .r-awa{filter:drop-shadow(0 0 5px rgba(242,165,123,.5))}
+.rings .r-int{filter:drop-shadow(0 0 5px rgba(127,200,204,.55))}
+.rings .pct{position:absolute;inset:0;display:grid;place-items:center;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.rl{display:flex;flex-direction:column;gap:11px}
+.rl .ri{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:500}
+.rl .dot{width:10px;height:10px;border-radius:50%}
+.rl .dot.g-reg{background:var(--reg);box-shadow:0 0 8px rgba(143,214,148,.7)}
+.rl .dot.g-awa{background:var(--awa);box-shadow:0 0 8px rgba(242,165,123,.6)}
+.rl .dot.g-int{background:var(--int);box-shadow:0 0 8px rgba(127,200,204,.7)}
+.rl .st{color:var(--ink-2);font-weight:400;margin-left:auto;padding-left:14px}
+.plist{overflow:hidden}
+.prow{padding:15px 16px;display:flex;align-items:center;gap:13px;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:var(--sans);transition:background .15s;color:var(--ink)}
+.prow:active{background:var(--card-press)}
+.prow + .prow{border-top:.5px solid var(--hairline)}
+.prow .pic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:19px;flex-shrink:0}
+.pic.b-reg{background:rgba(143,214,148,.12)}
+.pic.b-awa{background:rgba(242,165,123,.12)}
+.pic.b-int{background:rgba(127,200,204,.12)}
+.prow .pn{font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.prow .pm{font-size:13px;color:var(--ink-2);margin-top:1px}
+.prow .chev{margin-left:auto;color:var(--ink-3);font-size:17px;font-weight:600}
+.prow .check{margin-left:auto;width:26px;height:26px;border-radius:50%;background:var(--moss);color:#0C1110;display:grid;place-items:center;font-size:13px;font-weight:700}
+.prow.done .pn{color:var(--ink-3);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.25);text-decoration-thickness:1px}
+.week-strip{display:flex;gap:6px;padding:14px 16px;align-items:center}
+.week-strip .wd{flex:1;text-align:center}
+.week-strip .wl{font-size:10px;color:var(--ink-3);font-weight:600;margin-bottom:5px}
+.week-strip .wc{width:28px;height:28px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--ink-3);background:rgba(255,255,255,.04);transition:all .4s}
+.week-strip .wc.full{background:var(--moss);color:#0C1110;box-shadow:0 0 12px rgba(157,190,142,.35)}
+.week-strip .wc.part{background:rgba(157,190,142,.16);color:var(--moss)}
+.week-strip .wc.today{outline:2px solid var(--moss);outline-offset:1.5px}
+.cta{margin-top:16px;background:var(--moss);color:#0C1110;border-radius:var(--r-pill);padding:15px;text-align:center;font-size:16px;font-weight:600;letter-spacing:-.01em;cursor:pointer;border:none;width:100%;font-family:var(--sans);transition:all .2s;box-shadow:0 0 24px rgba(157,190,142,.25)}
+.cta:active{transform:scale(.98)}
+.cta.alldone{background:rgba(157,190,142,.14);color:var(--moss);box-shadow:none}
+.sos-line{margin-top:11px;text-align:center;font-size:14px;font-weight:500;color:var(--ember);padding:11px;border-radius:var(--r-pill);background:rgba(224,138,109,.09);cursor:pointer;border:none;width:100%;font-family:var(--sans);transition:transform .15s}
+.sos-line:active{transform:scale(.98)}
+
+/* BREATHE OVERLAY — same night, deeper. The room goes quiet rather than the lights flipping. */
+.breathe{position:absolute;inset:0;z-index:30;background:radial-gradient(120% 90% at 50% 30%, #131F1A 0%, #0A0F0E 58%, #060A09 100%);display:none;flex-direction:column;align-items:center;text-align:center;padding:64px 32px 0;color:var(--ink)}
+.breathe.active{display:flex;animation:quiet .8s ease-out}
+@keyframes quiet{from{opacity:0;transform:scale(1.02)}to{opacity:1;transform:none}}
+.bt-eyebrow{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-top:8px}
+.breathe .bt{font-size:24px;font-weight:300;letter-spacing:-.005em;margin-top:7px}
+.orbfield{position:relative;width:300px;height:300px;margin:20px 0 14px;display:grid;place-items:center}
+.glow{position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle, var(--moss-glow), transparent 70%);filter:blur(36px);transform:scale(.7);opacity:.5;transition:all 6s ease-in-out}
+.glow.in1{transition-duration:2.2s;transform:scale(1);opacity:.85}
+.glow.in2{transition-duration:1.3s;transform:scale(1.14);opacity:1}
+.glow.out{transition-duration:5.8s;transform:scale(.7);opacity:.5}
+.dorb{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 36% 30%, #C2DCB4, #9DBE8E 50%, #5C7A52 95%);box-shadow:0 0 70px var(--moss-glow), inset 0 -16px 44px rgba(0,0,0,.3);z-index:2;transform:scale(.72);transition:transform 6s ease-in-out}
+.dorb.in1{transition-duration:2.2s;transform:scale(.95)}
+.dorb.in2{transition-duration:1.3s;transform:scale(1.06)}
+.dorb.out{transition-duration:5.8s;transform:scale(.72)}
+.starring{position:absolute;inset:8px;border-radius:50%;border:1px dashed rgba(157,190,142,.2);animation:spin 60s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.breathe .phase{font-size:21px;font-weight:300;letter-spacing:.01em;min-height:30px}
+.breathe .count{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--moss);margin-top:7px;font-weight:700;min-height:16px}
+.btimer{font-size:13px;color:var(--ink-3);margin-top:14px;font-variant-numeric:tabular-nums}
+.haptic-note{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12px;color:var(--ink-3)}
+.bend{margin-top:auto;margin-bottom:46px;font-size:14px;color:var(--ink-2);border:1px solid rgba(255,255,255,.14);border-radius:var(--r-pill);padding:13px 38px;cursor:pointer;background:none;font-family:var(--sans);transition:all .25s}
+.bend:hover{background:rgba(255,255,255,.06)}
+.bend.donebtn{background:var(--moss);color:#0C1110;font-weight:600;border-color:var(--moss)}
+
+/* JOURNAL */
+.jprompt{padding:20px;margin-bottom:14px}
+.jprompt .jl{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--moss);margin-bottom:10px}
+.jprompt .jq{font-size:19px;font-weight:600;letter-spacing:-.015em;line-height:1.35}
+.jeditor{padding:20px;min-height:215px;font-size:16px;line-height:1.65;letter-spacing:-.005em;outline:none;color:var(--ink)}
+.jeditor:focus{box-shadow:0 0 0 2px var(--moss)}
+.jmeta{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);margin-top:12px}
+.jtags{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.jtag{background:var(--card);border:1px solid var(--hairline);border-radius:var(--r-pill);padding:8px 15px;font-size:13px;font-weight:500;color:var(--ink-2);cursor:pointer;font-family:var(--sans);transition:all .2s}
+.jtag.on{background:rgba(157,190,142,.16);border-color:transparent;color:var(--moss)}
+.savebtn{margin-top:14px;background:var(--moss);color:#0C1110;border:none;border-radius:var(--r-pill);padding:14px;width:100%;font-size:15px;font-weight:600;font-family:var(--sans);cursor:pointer;transition:transform .15s}
+.savebtn:active{transform:scale(.98)}
+
+/* PROGRESS */
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{padding:16px}
+.stat .sv{font-size:28px;font-weight:700;letter-spacing:-.025em}
+.stat .sv small{font-size:14px;font-weight:600;color:var(--ink-2)}
+.stat .sl{font-size:12px;color:var(--ink-2);margin-top:2px;font-weight:500}
+.stat .sv.green{color:var(--moss);text-shadow:0 0 18px rgba(157,190,142,.4)}
+.phasebar{padding:18px 20px}
+.phasebar .pb-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.phasebar .pb-top b{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.phasebar .pb-top span{font-size:12.5px;color:var(--ink-2)}
+.ptrack{display:flex;gap:5px}
+.pseg{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.08);cursor:pointer}
+.pseg.f{background:var(--moss);box-shadow:0 0 10px rgba(157,190,142,.4)}
+.pseg.h{background:linear-gradient(90deg,var(--moss) 50%,rgba(255,255,255,.08) 50%)}
+.plabels{display:flex;gap:5px;margin-top:7px}
+.plabels span{flex:1;font-size:10px;color:var(--ink-3);font-weight:600;text-align:center;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+.plabels span.on{color:var(--moss)}
+.phdetail{margin-top:12px;background:rgba(157,190,142,.1);border-radius:12px;padding:13px 15px;font-size:13px;line-height:1.5;color:#BCD2B1;display:none}
+.phdetail.show{display:block;animation:fadeUp .25s}
+.chart{padding:18px 20px}
+.chart h4{font-size:16px;font-weight:600;letter-spacing:-.01em;margin-bottom:2px}
+.chart .ch-s{font-size:12.5px;color:var(--ink-2);margin-bottom:14px}
+.bars{display:flex;align-items:flex-end;gap:9px;height:110px}
+.bg-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:5px;cursor:pointer}
+.bseg{border-radius:5px;background:linear-gradient(180deg,#B5D3A7,#7FA471);opacity:.9;transition:opacity .2s;box-shadow:0 0 12px rgba(157,190,142,.22)}
+.bg-bar:hover .bseg{opacity:1}
+.bg-bar .bl{font-size:10px;color:var(--ink-3);text-align:center;font-weight:600;margin-top:2px}
+.insight-c{padding:16px 18px;display:flex;gap:12px;align-items:flex-start;margin-top:14px;background:rgba(157,190,142,.1);border:none}
+.insight-c .ii{font-size:18px}
+.insight-c p{font-size:13.5px;line-height:1.5;color:#BCD2B1;font-weight:500}
+
+/* PLACEHOLDER */
+.placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;color:var(--ink-2)}
+.placeholder .pe{font-size:44px}
+.placeholder h3{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.placeholder p{font-size:13.5px;max-width:240px;line-height:1.5}
+.toast{position:absolute;bottom:104px;left:50%;transform:translateX(-50%) translateY(20px);background:#E9EDEA;color:#0C1110;font-size:13px;padding:11px 22px;border-radius:var(--r-pill);opacity:0;transition:all .35s;z-index:50;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <div class="tag">Prototype 06 · Interactive · Hybrid refined</div>
+  <h1>Eclipse</h1>
+  <p>Clarity × Dusk, fused rather than switched. Clarity's information design — rings, large titles, structured cards — living permanently in Dusk's night atmosphere. Apple Fitness energy: glowing rings on black. Breathing deepens the same room instead of flipping registers.</p>
+  <div class="hint">Tap Self-Validation or "I'm feeling triggered" — note the breathing screen feels continuous, not a mode change</div>
+</div>
+
+<div class="phone"><div class="notch"></div>
+  <div class="app">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="views">
+
+      <!-- TODAY -->
+      <div class="view active" id="v-today">
+        <div class="large-title">Today</div>
+        <div class="subtitle">Thursday, June 12 · Week 6 · Phase 2</div>
+        <div class="card rings-card">
+          <div class="rings">
+            <svg width="128" height="128" viewBox="0 0 128 128">
+              <circle cx="64" cy="64" r="56" fill="none" stroke="rgba(143,214,148,.14)" stroke-width="9"/>
+              <circle class="fill r-reg" cx="64" cy="64" r="56" fill="none" stroke="#8FD694" stroke-width="9" stroke-linecap="round" stroke-dasharray="352" stroke-dashoffset="0"/>
+              <circle cx="64" cy="64" r="43" fill="none" stroke="rgba(242,165,123,.14)" stroke-width="9"/>
+              <circle class="fill r-awa" cx="64" cy="64" r="43" fill="none" stroke="#F2A57B" stroke-width="9" stroke-linecap="round" stroke-dasharray="270" stroke-dashoffset="0"/>
+              <circle cx="64" cy="64" r="30" fill="none" stroke="rgba(127,200,204,.14)" stroke-width="9"/>
+              <circle class="fill r-int" id="ring-int" cx="64" cy="64" r="30" fill="none" stroke="#7FC8CC" stroke-width="9" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188"/>
+            </svg>
+            <div class="pct" id="ringpct">2/3</div>
+          </div>
+          <div class="rl">
+            <div class="ri"><span class="dot g-reg"></span>Regulation<span class="st">Done</span></div>
+            <div class="ri"><span class="dot g-awa"></span>Awareness<span class="st">Done</span></div>
+            <div class="ri"><span class="dot g-int"></span>Integration<span class="st" id="int-status">—</span></div>
+          </div>
+        </div>
+        <div class="sec-label">Practices</div>
+        <div class="card plist">
+          <button class="prow done" onclick="toast('Completed at 7:32 AM')">
+            <span class="pic b-reg">🫁</span>
+            <span><span class="pn" style="display:block">Physiological Sigh</span><span class="pm">Regulation · 3 min</span></span>
+            <span class="check">✓</span>
+          </button>
+          <button class="prow done" onclick="toast('Completed at 12:14 PM')">
+            <span class="pic b-awa">🪞</span>
+            <span><span class="pn" style="display:block">Schema Check-In</span><span class="pm">Awareness · 5 min</span></span>
+            <span class="check">✓</span>
+          </button>
+          <button class="prow" id="prow-int" onclick="openBreathe(false)">
+            <span class="pic b-int">🌿</span>
+            <span><span class="pn" style="display:block">Self-Validation</span><span class="pm" id="int-pm">Integration · 4 min</span></span>
+            <span class="chev" id="int-chev">›</span>
+          </button>
+        </div>
+        <div class="sec-label">This week</div>
+        <div class="card week-strip">
+          <div class="wd"><div class="wl">M</div><div class="wc full">✓</div></div>
+          <div class="wd"><div class="wl">T</div><div class="wc full">✓</div></div>
+          <div class="wd"><div class="wl">W</div><div class="wc part">2</div></div>
+          <div class="wd"><div class="wl">T</div><div class="wc part today" id="todaycell">2</div></div>
+          <div class="wd"><div class="wl">F</div><div class="wc"></div></div>
+          <div class="wd"><div class="wl">S</div><div class="wc"></div></div>
+          <div class="wd"><div class="wl">S</div><div class="wc"></div></div>
+        </div>
+        <button class="cta" id="cta" onclick="openBreathe(false)">Begin Self-Validation</button>
+        <button class="sos-line" onclick="openBreathe(true)">I'm feeling triggered →</button>
+      </div>
+
+      <!-- JOURNAL -->
+      <div class="view" id="v-journal">
+        <div class="large-title">Journal</div>
+        <div class="subtitle">Protest Behavior Journal · tonight</div>
+        <div class="card jprompt">
+          <div class="jl">🔒 Encrypted prompt</div>
+          <div class="jq">When you felt the urge to text again tonight — what was the feeling underneath the urge?</div>
+        </div>
+        <div class="card jeditor" contenteditable="true">I noticed my chest tighten when she didn't reply. The old story started — "you're too much." But I paused this time and&nbsp;</div>
+        <div class="jmeta">🔒 End-to-end encrypted · only you can read this</div>
+        <div class="jtags">
+          <button class="jtag on" onclick="this.classList.toggle('on')">😰 Anxious</button>
+          <button class="jtag" onclick="this.classList.toggle('on')">Chest</button>
+          <button class="jtag" onclick="this.classList.toggle('on')">Tight jaw</button>
+          <button class="jtag" onclick="this.classList.toggle('on')">+ Sensation</button>
+        </div>
+        <button class="savebtn" onclick="saveEntry(this)">Save Entry</button>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="view" id="v-progress">
+        <div class="large-title">Progress</div>
+        <div class="subtitle">Anxious track · started May 1</div>
+        <div class="statgrid">
+          <div class="card stat"><div class="sv green" id="fulldays">38</div><div class="sl">Fully completed days</div></div>
+          <div class="card stat"><div class="sv">12<small> day</small></div><div class="sl">Current streak</div></div>
+        </div>
+        <div class="sec-label">Curriculum</div>
+        <div class="card phasebar">
+          <div class="pb-top"><b>Phase 2 · Awareness</b><span>Week 6 of 12</span></div>
+          <div class="ptrack">
+            <div class="pseg f" onclick="showPhase(0)"></div>
+            <div class="pseg h" onclick="showPhase(1)"></div>
+            <div class="pseg" onclick="showPhase(2)"></div>
+            <div class="pseg" onclick="showPhase(3)"></div>
+          </div>
+          <div class="plabels">
+            <span class="on" onclick="showPhase(0)">Stabilize</span>
+            <span class="on" onclick="showPhase(1)">Awareness</span>
+            <span onclick="showPhase(2)">Rewire</span>
+            <span onclick="showPhase(3)">Integrate</span>
+          </div>
+          <div class="phdetail" id="phdetail"></div>
+        </div>
+        <div class="sec-label">Completion</div>
+        <div class="card chart">
+          <h4>Practices per week</h4>
+          <div class="ch-s">Tap a bar for detail</div>
+          <div class="bars" id="bars"></div>
+        </div>
+        <div class="card insight-c">
+          <div class="ii">💡</div>
+          <p>Your journal entries mention "the pause" 3× more often than in week one. The space between trigger and response is widening.</p>
+        </div>
+      </div>
+
+      <!-- COUPLES -->
+      <div class="view" id="v-couples">
+        <div class="placeholder">
+          <div class="pe">🤍</div>
+          <h3>Couples</h3>
+          <p>Shared practices, repair-attempt scripts, partner check-ins. Out of scope for this prototype.</p>
+        </div>
+      </div>
+
+      <!-- LIBRARY -->
+      <div class="view" id="v-library">
+        <div class="placeholder">
+          <div class="pe">📚</div>
+          <h3>Library</h3>
+          <p>All 37 practices, browsable by slot and attachment style.</p>
+        </div>
+      </div>
+
+      <!-- BREATHE OVERLAY — same night, deeper -->
+      <div class="breathe" id="breathe">
+        <div class="bt-eyebrow" id="b-eyebrow">Regulation · Round 1 of 5</div>
+        <div class="bt" id="b-title">Physiological Sigh</div>
+        <div class="orbfield">
+          <div class="glow" id="glow"></div>
+          <div class="starring"></div>
+          <div class="dorb" id="orb"></div>
+        </div>
+        <div class="phase" id="b-phase">Settle in…</div>
+        <div class="count" id="b-count"></div>
+        <div class="btimer" id="b-timer">0:00</div>
+        <div class="haptic-note">〰 Haptics synced to your breath</div>
+        <button class="bend" id="b-end" onclick="endBreathe()">End early — that's okay too</button>
+      </div>
+
+    </div>
+
+    <div class="tabbar">
+      <button class="tab on" onclick="go('today',this)"><span class="ti">🏠</span>Today</button>
+      <button class="tab" onclick="go('journal',this)"><span class="ti">📖</span>Journal</button>
+      <button class="tab" onclick="go('progress',this)"><span class="ti">📈</span>Progress</button>
+      <button class="tab" onclick="go('couples',this)"><span class="ti">🤍</span>Couples</button>
+      <button class="tab" onclick="go('library',this)"><span class="ti">📚</span>Library</button>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+function go(v,btn){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('v-'+v).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// breathing — physiological sigh
+const PHASES=[
+  {label:'Breathe in…', count:'Inhale · 2s', cls:'in1', ms:2200},
+  {label:'A little more', count:'Top-up · 1s', cls:'in2', ms:1300},
+  {label:'Let it all out…', count:'Exhale · 6s', cls:'out', ms:5800},
+];
+const TOTAL_ROUNDS=5;
+let bTimer=null, tickTimer=null, round=0, elapsed=0, isSOS=false, finished=false, intDone=false;
+
+function openBreathe(sos){
+  if(!sos && intDone){ toast('Already complete for today'); return; }
+  isSOS=sos; finished=false; round=0; elapsed=0;
+  document.getElementById('b-title').textContent = sos ? "You're safe. Breathe with me." : 'Physiological Sigh';
+  const end=document.getElementById('b-end');
+  end.textContent="End early — that's okay too"; end.classList.remove('donebtn');
+  document.getElementById('breathe').classList.add('active');
+  document.getElementById('b-timer').textContent='0:00';
+  tickTimer=setInterval(()=>{
+    elapsed++;
+    const m=Math.floor(elapsed/60), s=String(elapsed%60).padStart(2,'0');
+    document.getElementById('b-timer').textContent=m+':'+s;
+  },1000);
+  runPhase(0);
+}
+function runPhase(i){
+  if(i===0){
+    round++;
+    if(round>TOTAL_ROUNDS){ completeBreathe(); return; }
+    document.getElementById('b-eyebrow').textContent=
+      (isSOS?'Emergency regulation':'Regulation')+' · Round '+round+' of '+TOTAL_ROUNDS;
+  }
+  const p=PHASES[i];
+  [document.getElementById('orb'),document.getElementById('glow')].forEach(el=>{
+    el.classList.remove('in1','in2','out');
+    void el.offsetWidth;
+    el.classList.add(p.cls);
+  });
+  document.getElementById('b-phase').textContent=p.label;
+  document.getElementById('b-count').textContent=p.count;
+  bTimer=setTimeout(()=>runPhase((i+1)%PHASES.length), p.ms);
+}
+function completeBreathe(){
+  finished=true;
+  clearTimeout(bTimer); clearInterval(tickTimer);
+  document.getElementById('b-phase').textContent='Still here. Well done.';
+  document.getElementById('b-count').textContent='5 rounds complete';
+  document.getElementById('b-eyebrow').textContent='Complete';
+  const end=document.getElementById('b-end');
+  end.textContent='Finish & return'; end.classList.add('donebtn');
+}
+function endBreathe(){
+  clearTimeout(bTimer); clearInterval(tickTimer);
+  document.getElementById('breathe').classList.remove('active');
+  if(finished && !isSOS) markIntegrationDone();
+  else if(finished && isSOS) toast('Logged: regulation session');
+  else toast('Ended early — still counts as showing up');
+}
+function markIntegrationDone(){
+  if(intDone) return;
+  intDone=true;
+  document.getElementById('ring-int').style.strokeDashoffset='0';
+  document.getElementById('ringpct').textContent='3/3';
+  document.getElementById('int-status').textContent='Done';
+  const row=document.getElementById('prow-int');
+  row.classList.add('done');
+  document.getElementById('int-chev').outerHTML='<span class="check">✓</span>';
+  document.getElementById('int-pm').textContent='Integration · completed 9:41 PM';
+  const tc=document.getElementById('todaycell');
+  tc.classList.remove('part'); tc.classList.add('full'); tc.textContent='✓';
+  const cta=document.getElementById('cta');
+  cta.textContent='All done for today ✓'; cta.classList.add('alldone');
+  document.getElementById('fulldays').textContent='39';
+}
+
+// journal
+function saveEntry(btn){
+  btn.textContent='Saved ✓';
+  toast('Encrypted and saved');
+  setTimeout(()=>{btn.textContent='Save Entry';},2000);
+}
+
+// progress
+const PHASE_INFO=[
+  'Phase 1 — Stabilize (weeks 1–4). Nervous-system regulation: sighs, box breathing, grounding. Complete.',
+  'Phase 2 — Awareness (weeks 5–8). You are here. Schema check-ins, protest behavior journaling, trigger reflection.',
+  'Phase 3 — Rewire (weeks 9–12). Schema dialogue, behavioral experiments, vulnerability ladder. Unlocks week 9.',
+  'Phase 4 — Integrate (week 13+). Maintenance mode: secure patterns as default.',
+];
+let openPhase=-1;
+function showPhase(i){
+  const d=document.getElementById('phdetail');
+  if(openPhase===i){ d.classList.remove('show'); openPhase=-1; return; }
+  d.textContent=PHASE_INFO[i]; d.classList.add('show'); openPhase=i;
+}
+const WEEKS=[{h:38,n:8},{h:52,n:11},{h:64,n:14},{h:58,n:12},{h:84,n:18},{h:71,n:15,cur:true}];
+const bars=document.getElementById('bars');
+WEEKS.forEach((w,i)=>{
+  const b=document.createElement('div');
+  b.className='bg-bar';
+  b.innerHTML=`<div class="bseg" style="height:${w.h}%${w.cur?';opacity:.45':''}"></div><div class="bl">W${i+1}</div>`;
+  b.onclick=()=>toast(`Week ${i+1}: ${w.n} of 21 practices${w.cur?' (in progress)':''}`);
+  bars.appendChild(b);
+});
+</script>
+</body>
+</html>
