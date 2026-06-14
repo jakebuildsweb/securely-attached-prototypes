@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden}
+  .canvas{width:1080px;height:1920px;position:relative;
+    background:
+      radial-gradient(120% 80% at 50% 8%, #20302a 0%, #131a17 42%, #0c1110 100%);
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;
+    color:#eef2ef;-webkit-font-smoothing:antialiased}
+  /* subtle grain/vignette */
+  .canvas::after{content:'';position:absolute;inset:0;
+    background:radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0,0,0,.45) 100%);
+    pointer-events:none}
+
+  .top{position:absolute;top:118px;left:0;right:0;text-align:center;z-index:3}
+  .eyebrow{font-size:25px;letter-spacing:.34em;text-transform:uppercase;color:#9DBE8E;font-weight:700;margin-bottom:22px}
+  .head{font-size:76px;font-weight:700;letter-spacing:-.02em;line-height:1.04}
+  .head em{font-style:normal;color:#A9C49B}
+  .sub{font-size:30px;color:#9aa69e;margin-top:22px;font-weight:500}
+
+  /* phone fan */
+  .stage{position:absolute;top:560px;left:0;right:0;height:880px;display:flex;justify-content:center;align-items:center;z-index:2}
+  .ph{position:absolute;width:300px;border-radius:38px;overflow:hidden;
+    border:7px solid #11100f;box-shadow:0 40px 90px rgba(0,0,0,.6)}
+  .ph img{display:block;width:100%}
+  .ph.left{transform:translateX(-340px) rotate(-9deg) scale(.86);z-index:1}
+  .ph.right{transform:translateX(340px) rotate(9deg) scale(.86);z-index:1}
+  .ph.center{transform:translateY(-14px) scale(1.02);z-index:3;box-shadow:0 50px 110px rgba(0,0,0,.7), 0 0 60px rgba(157,190,142,.12)}
+
+  .num{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+    width:74px;height:74px;border-radius:50%;
+    background:#9DBE8E;color:#0c1110;font-size:38px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 30px rgba(0,0,0,.5);z-index:5;border:4px solid #0c1110}
+  .ph.left .num,.ph.right .num{width:64px;height:64px;font-size:32px}
+
+  .labels{position:absolute;top:1470px;left:0;right:0;display:flex;justify-content:center;gap:96px;z-index:4}
+  .lab{text-align:center}
+  .lab .ln{font-size:34px;font-weight:700;letter-spacing:-.01em}
+  .lab .ld{font-size:21px;color:#8b958f;margin-top:4px;font-weight:500}
+
+  .cta{position:absolute;bottom:150px;left:0;right:0;text-align:center;z-index:4}
+  .cta .q{font-size:40px;font-weight:700;letter-spacing:-.01em}
+  .cta .swipe{margin-top:18px;font-size:26px;color:#9DBE8E;font-weight:600}
+  .cta .swipe span{opacity:.6}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="top">
+    <div class="eyebrow">Securely Attached</div>
+    <div class="head">Help me pick<br>a <em>redesign</em></div>
+    <div class="sub">Three directions · which feels right?</div>
+  </div>
+
+  <div class="stage">
+    <div class="ph left"><img src="../shots/1-sanctuary.png"><div class="num">1</div></div>
+    <div class="ph right"><img src="../shots/3-dusk.png"><div class="num">3</div></div>
+    <div class="ph center"><img src="../shots/2-clarity.png"><div class="num">2</div></div>
+  </div>
+
+  <div class="labels">
+    <div class="lab"><div class="ln">1 · Sanctuary</div><div class="ld">Warm &amp; editorial</div></div>
+    <div class="lab"><div class="ln">2 · Clarity</div><div class="ld">Clean &amp; minimal</div></div>
+    <div class="lab"><div class="ln">3 · Dusk</div><div class="ld">Dark &amp; calm</div></div>
+  </div>
+
+  <div class="cta">
+    <div class="q">Which one would you open daily?</div>
+    <div class="swipe">tap the link to try all three <span>↑</span></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1080px;overflow:hidden}
+  .canvas{width:1080px;height:1080px;position:relative;
+    background:radial-gradient(120% 90% at 50% 0%, #20302a 0%, #131a17 45%, #0c1110 100%);
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;
+    color:#eef2ef;-webkit-font-smoothing:antialiased}
+  .canvas::after{content:'';position:absolute;inset:0;
+    background:radial-gradient(120% 90% at 50% 45%, transparent 58%, rgba(0,0,0,.4) 100%);pointer-events:none}
+
+  .top{position:absolute;top:72px;left:0;right:0;text-align:center;z-index:3}
+  .eyebrow{font-size:22px;letter-spacing:.32em;text-transform:uppercase;color:#9DBE8E;font-weight:700;margin-bottom:16px}
+  .head{font-size:58px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  .head em{font-style:normal;color:#A9C49B}
+
+  .stage{position:absolute;top:300px;left:0;right:0;height:560px;display:flex;justify-content:center;align-items:center;z-index:2}
+  .ph{position:absolute;width:236px;border-radius:30px;overflow:hidden;border:6px solid #11100f;box-shadow:0 30px 70px rgba(0,0,0,.6)}
+  .ph img{display:block;width:100%}
+  .ph.left{transform:translateX(-280px) rotate(-9deg) scale(.86);z-index:1}
+  .ph.right{transform:translateX(280px) rotate(9deg) scale(.86);z-index:1}
+  .ph.center{transform:translateY(-10px) scale(1.02);z-index:3;box-shadow:0 40px 90px rgba(0,0,0,.7), 0 0 50px rgba(157,190,142,.12)}
+  .num{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:60px;height:60px;border-radius:50%;background:#9DBE8E;color:#0c1110;font-size:31px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,0,0,.5);z-index:5;border:4px solid #0c1110}
+  .ph.left .num,.ph.right .num{width:52px;height:52px;font-size:26px}
+
+  .cta{position:absolute;bottom:96px;left:0;right:0;text-align:center;z-index:4}
+  .cta .q{font-size:38px;font-weight:700;letter-spacing:-.01em}
+  .cta .swipe{margin-top:14px;font-size:24px;color:#9DBE8E;font-weight:600}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="top">
+    <div class="eyebrow">Securely Attached</div>
+    <div class="head">Help me pick a <em>redesign</em></div>
+  </div>
+  <div class="stage">
+    <div class="ph left"><img src="../shots/1-sanctuary.png"><div class="num">1</div></div>
+    <div class="ph right"><img src="../shots/3-dusk.png"><div class="num">3</div></div>
+    <div class="ph center"><img src="../shots/2-clarity.png"><div class="num">2</div></div>
+  </div>
+  <div class="cta">
+    <div class="q">1, 2, or 3 — which would you open daily?</div>
+    <div class="swipe">Vote in the comments · link to try all three</div>
+  </div>
+</div>
+</body>
+</html>
